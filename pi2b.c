@@ -54,17 +54,17 @@ int MPI_BinomialColectiva(void *buffer, int count, MPI_Datatype datatype,
         return MPI_ERR_OP; // Solo soportamos enteros y root = 0
     }
 
-    for (int step = 1; step < numprocs; step *= 2) {
-        if (rank < step) {
-            int dest = rank + step;
+    for (int pos = 1; pos < numprocs; pos *= 2) {
+        if (rank < pos) {
+            int dest = rank + pos;
             if (dest < numprocs) {
                 err = MPI_Send(buffer, count, datatype, dest, 0, comm);
                 if (err != MPI_SUCCESS) {
                     return err; // Error en MPI_Send
                 }
             }
-        } else if (rank < 2 * step) {
-            int source = rank - step;
+        } else if (rank < 2 * pos) {
+            int source = rank - pos;
             err = MPI_Recv(buffer, count, datatype, source, 0, comm, MPI_STATUS_IGNORE);
             if (err != MPI_SUCCESS) {
                 return err; // Error en MPI_Recv
@@ -124,3 +124,12 @@ int main(int argc, char *argv[]) {
     MPI_Finalize();
     return 0;
 }
+
+
+//DEFENSA
+//EN EL FLATTREE EN LAS COMUNICACIONES MPI TIENEN QUE SER GENERICAS Y USAR MISMOS PARAMETROS, POR DENTRO PODEMOS ASUMIR QUE 
+//PUEDE SER ENTERO, NO TIENE QUE SER GENÉRICO
+
+//DONDE SOLEMOS PERDER PUNTOS: QUE PASA SI AL FLATTREE CAMBIAMOS EL ROOT?, EXPLICAR POR QUÉ,
+//QUE PASA SI TENGO UN Nº DE PROCESOS IMPAR??????, Y ALGUN PROCESO NO TIENE A QUIEN MANDAR INFO? QUIERE MANDAR UN DATO QUE 
+//NADIE QUIERE RECIBIR
